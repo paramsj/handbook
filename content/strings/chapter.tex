@@ -1,0 +1,41 @@
+\chapter{Strings}
+
+\kactlimport{doubleHasher.h}
+\kactlimport{SAM.h}
+\small % or \footnotesize for even smaller text
+
+\textbf{Number of Distinct Substrings:} Each state $u$ represents substrings of lengths $(len(link(u)), len(u)]$, calculated as:
+\[
+\sum_{u=1}^{sz-1} (len(u) - len(link(u)))
+\]
+
+\textbf{Total Length of Distinct Substrings:} Arithmetic sum per state:
+\[
+\sum_{u=1}^{sz-1} \frac{(len(u) - len(link(u)))(len(u) + len(link(u)) + 1)}{2}
+\]
+
+\textbf{Occurrence Count:} Initialize $cnt[u] = 1$ for non-clones, $0$ for clones; sort states by decreasing $len$; propagate $cnt[link(u)] += cnt[u]$.
+
+\textbf{First Occurrence Position:} Store $first\_pos$: new state $= len(cur) - 1$, clone $= first\_pos(q)$; query answer $first\_pos(u) - |P| + 1$.
+
+\textbf{All Occurrence Positions:} Store inverse links $adj[link(u)].push\_back(u)$; DFS/BFS from state $u$ on inverse link tree (ignore clones).
+
+\textbf{Longest Common Substring (2 Strings):} Build SAM of $S$, stream $T$ keeping node $v$ and length $l$: if $next[v][c]$ exists, $v = next[v][c]$, $l++$; else jump $v \to link(v)$, $l = len(v)$ until valid. Max $l$ is LCS.
+
+\textbf{LCS of K Strings:} Build SAM of $T = S_1\#_1S_2\#_2 \dots S_K\#_K$; propagate per-state reachability (bitmask/count); answer is max $len(u)$ reachable by all $K$.
+
+\textbf{Shortest Non-Appearing String:} BFS/DP on SAM graph (not links), $dp[u] = 1 + \min_{(u,v) \in edges} dp[v]$; shortest path from root to state with missing transition.
+
+\textbf{Smallest Cyclic Shift:} Build SAM for $S + S$, from root greedily take smallest lex edge for exactly $|S|$ steps.
+
+\textbf{K-th Lexicographical Substring:} Compute DAG paths $paths[u] = 1 + \sum_{(u,v) \in edges} paths[v]$, greedily traverse from root subtracting subtree sizes until $K$ hits.
+
+\normalsize % return to normal font size if desired
+\kactlimport{KMP.h}
+\kactlimport{Zfunc.h}
+%kactlimport{Manacher.h}
+%kactlimport{MinRotation.h}
+%kactlimport{SuffixArray.h}
+%kactlimport{SuffixTree.h}
+%kactlimport{Hashing.h}
+%kactlimport{AhoCorasick.h}
