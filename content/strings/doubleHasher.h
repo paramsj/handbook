@@ -68,7 +68,7 @@ struct doubleHasher{
     
     doubleHasher(string s) {
         hash1 = hasher(s, 53, 1000000007); 
-        hash2 = hasher(s, 53, 9999999937);
+        hash2 = hasher(s, 53, 1000000009);
     }
     
     int getHash(int l,int r) {

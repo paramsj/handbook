@@ -2,33 +2,73 @@
  * Author: Adam Soltan
  * Date: 2026-01-13
  * License: CC0
- * Description: Fast bipartite matching algorithm. Graph $g$ should be a list
- * of neighbors of the left partition, and $r$ should be a vector full of
- * $-1$'s of the same size as the right partition. Returns the size of
- * the matching. $r[i]$ will be the match for vertex $i$ on the right side,
- * or $-1$ if it's not matched.
+ * Description: Description: Fast bipartite matching algorithm. Graph $adj$ should be a list of neighbors of the left partition, and $matchR$ should be an array of size $M$ initialized to $0$. Returns the size of the matching in $O(E\sqrt{V})$. $matchR[i]$ will be the match for vertex $i$ on the right side, or $0$ if it is not matched.
  * Time: O(E \sqrt{V})
  * Status: stress-tested by MinimumVertexCover and tested on Library Checker
  */
-#pragma once
 
-int hopcroftKarp(vector<vi>& g, vi& r) {
-	int n = sz(g), res = 0;
-	vi l(n, -1), q(n), d(n);
-	auto dfs = [&](auto f, int u) -> bool {
-		int t = exchange(d[u], 0) + 1;
-		for (int v : g[u])
-			if (r[v] == -1 || (d[r[v]] == t && f(f, r[v])))
-				return l[u] = v, r[v] = u, 1;
-		return 0;
-	};
-	for (int t = 0, f = 0;; t = f = 0, d.assign(n, 0)) {
-		rep(i,0,n) if (l[i] == -1) q[t++] = i, d[i] = 1;
-		rep(i,0,t) for (int v : g[q[i]]) {
-			if (r[v] == -1) f = 1;
-			else if (!d[r[v]]) d[r[v]] = d[q[i]] + 1, q[t++] = r[v];
-		}
-		if (!f) return res;
-		rep(i,0,n) if (l[i] == -1) res += dfs(dfs, i);
-	}
+
+vector<int> adj[MAXN];
+int matchL[MAXN], matchR[MAXM], dist[MAXN];
+int n, m; // n: size of U, m: size of V
+
+bool bfs() {
+    queue<int> q;
+    for (int u = 1; u <= n; u++) {
+        if (matchL[u] == 0) {
+            dist[u] = 0;
+            q.push(u);
+        } else {
+            dist[u] = INF;
+        }
+    }
+    dist[0] = INF;
+
+    while (!q.empty()) {
+        int u = q.front();
+        q.pop();
+
+        if (dist[u] < dist[0]) {
+            for (int v : adj[u]) {
+                if (dist[matchR[v]] == INF) {
+                    dist[matchR[v]] = dist[u] + 1;
+                    q.push(matchR[v]);
+                }
+            }
+        }
+    }
+    return dist[0] != INF;
+}
+
+bool dfs(int u) {
+    if (u != 0) {
+        for (int v : adj[u]) {
+            if (dist[matchR[v]] == dist[u] + 1) {
+                if (dfs(matchR[v])) {
+                    matchR[v] = u;
+                    matchL[u] = v;
+                    return true;
+                }
+            }
+        }
+        dist[u] = INF;
+        return false;
+    }
+    return true;
+}
+
+int hopcroft_karp() {
+    int matching = 0;
+    // Reset matches
+    for (int i = 0; i <= n; i++) matchL[i] = 0;
+    for (int i = 0; i <= m; i++) matchR[i] = 0;
+
+    while (bfs()) {
+        for (int u = 1; u <= n; u++) {
+            if (matchL[u] == 0 && dfs(u)) {
+                matching++;
+            }
+        }
+    }
+    return matching;
 }
