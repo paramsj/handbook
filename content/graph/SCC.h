@@ -1,41 +1,50 @@
+
 /**
- * Author: Lukas Polacek
- * Date: 2009-10-28
- * License: CC0
- * Source: Czech graph algorithms book, by Demel. (Tarjan's algorithm)
- * Description: Finds strongly connected components in a
- * directed graph. If vertices $u, v$ belong to the same component,
- * we can reach $u$ from $v$ and vice versa.
- * Usage: scc(graph, [\&](vi\& v) { ... }) visits all components
- * in reverse topological order. comp[i] holds the component
- * index of a node (a component only has edges to components with
- * lower index). ncomps will contain the number of components.
- * Time: O(E + V)
- * Status: Bruteforce-tested for N <= 5
+ * Author: Unknown
+ * Date: 2002-09-13
+ * Source: predates tinyKACTL
+ * Description: Converts Graph into a DAG.
+ * Time: $O(|V|+|E|)$
+ * Status: stress-tested
  */
-#pragma once
 
-vi val, comp, z, cont;
-int Time, ncomps;
-template<class G, class F> int dfs(int j, G& g, F& f) {
-	int low = val[j] = ++Time, x; z.push_back(j);
-	for (auto e : g[j]) if (comp[e] < 0)
-		low = min(low, val[e] ?: dfs(e,g,f));
+void dfs(int u, vector<vector<int>> &g, vector<int> &visited, stack<int> &s) {
+    visited[u] = 1;
+    for(auto v : g[u]) {
+        if(!visited[v]) dfs(v, g, visited, s);
+    }
+    s.push(u);
+}
 
-	if (low == val[j]) {
-		do {
-			x = z.back(); z.pop_back();
-			comp[x] = ncomps;
-			cont.push_back(x);
-		} while (x != j);
-		f(cont); cont.clear();
-		ncomps++;
-	}
-	return val[j] = low;
+void dfs1(int u, vector<vector<int>> &g_dash, vector<int> &visited, int scc, vector<int> &res) {
+    visited[u] = 1;
+    res[u] = scc;
+    for(auto v : g_dash[u]) {
+        if(!visited[v]) dfs1(v, g_dash, visited, scc, res);
+    }
 }
-template<class G, class F> void scc(G& g, F f) {
-	int n = sz(g);
-	val.assign(n, 0); comp.assign(n, -1);
-	Time = ncomps = 0;
-	rep(i,0,n) if (comp[i] < 0) dfs(i, g, f);
+vector<int> kosaraju(int n, vector<vector<int>> &g) {
+    stack<int> s;
+    vector<int> visited(n + 1, 0);
+    for(int i = 1; i <= n; i++) {
+        if(!visited[i]) dfs(i, g, visited, s);
+    }
+    vector<vector<int>> g_dash(n + 1);
+    for(int i = 1; i <= n; i++) {
+        for(auto v : g[i]) g_dash[v].push_back(i);
+    }
+    fill(visited.begin(), visited.end(), 0);
+    vector<int> res(n + 1, 0);
+    int scc_count = 0;
+    
+    while(!s.empty()) {
+        int node = s.top();
+        s.pop();
+        if(!visited[node]) {
+            scc_count++;
+            dfs1(node, g_dash, visited, scc_count, res);
+        }
+    }
+    return res;
 }
+
