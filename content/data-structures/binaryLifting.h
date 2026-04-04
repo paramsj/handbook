@@ -53,6 +53,6 @@ dfs(1,0,g,depth);
 for(int i=1;i<=LOG;i++) {
     for(int j=1;j<=n;j++) {
         parent[j][i] = parent[parent[j][i-1]][i-1]; // here query also
-        query[j][i] = min(query[i][j-1],query[parent[i][j-1]][j-1]);
+        query[j][i] = min(query[j][i-1],query[parent[j][i-1]][i-1]);
     }
 }
