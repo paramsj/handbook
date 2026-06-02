@@ -43,6 +43,7 @@ Node query(int idx,int tl,int th,int ql,int qh) {
     return merge(query(2*idx,tl,mid,ql,qh),query(2*idx + 1,mid + 1,th,ql,qh));
 }
 
+void update(int idx,int tl,int th,int pos,int val) {
     if(tl>pos || th<pos) {
         return;
     }
